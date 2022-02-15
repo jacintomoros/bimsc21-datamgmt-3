@@ -5,16 +5,17 @@ import rhino3dm from "https://cdn.jsdelivr.net/npm/rhino3dm@7.11.1/rhino3dm.modu
 import { RhinoCompute } from "https://cdn.jsdelivr.net/npm/compute-rhino3d@0.13.0-beta/compute.rhino3d.module.js";
 import { Rhino3dmLoader } from "https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/loaders/3DMLoader.js";
 
-const definitionName = "rnd_node.gh";
+const definitionName = "OSM_node.gh";
+
+const downloadButton = document.getElementById("downloadButton")
+downloadButton.onclick = download
 
 // Set up sliders
-const radius_slider = document.getElementById("radius");
-radius_slider.addEventListener("mouseup", onSliderChange, false);
-radius_slider.addEventListener("touchend", onSliderChange, false);
+const bbox_input = document.getElementById("bbox");
+bbox_input.addEventListener("input", onChange, false);
 
-const count_slider = document.getElementById("count");
-count_slider.addEventListener("mouseup", onSliderChange, false);
-count_slider.addEventListener("touchend", onSliderChange, false);
+const OSMkey_input = document.getElementById("osmkey");
+OSMkey_input.addEventListener("input", onChange, false);
 
 const loader = new Rhino3dmLoader();
 loader.setLibraryPath("https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/");
@@ -41,12 +42,20 @@ rhino3dm().then(async (m) => {
   compute();
 });
 
-async function compute() {
-  const param1 = new RhinoCompute.Grasshopper.DataTree("Radius");
-  param1.append([0], [radius_slider.valueAsNumber]);
+async function compute() 
 
-  const param2 = new RhinoCompute.Grasshopper.DataTree("Count");
-  param2.append([0], [count_slider.valueAsNumber]);
+ // console.log(text_input.value)
+ if (text_input.value.length === 0) return
+ // format data
+ let param1 = new RhinoCompute.Grasshopper.DataTree('boundingBox')
+ param1.append([0], [bbox_input.value])
+ console.log(bbox_input.value)
+
+ let param2 = new RhinoCompute.Grasshopper.DataTree('OSMFeatureType')
+ param1.append([0], [OSMkey_input.value])
+ console.log(OSMkey_input.value)
+
+ {
 
   // clear values
   const trees = [];
@@ -58,6 +67,7 @@ async function compute() {
     trees
   );
 
+  collectResults(res)
 
   //console.log(res);
 
@@ -132,12 +142,25 @@ async function compute() {
   });
 }
 
-function onSliderChange() {
+function onChange() {
   // show spinner
   document.getElementById("loader").style.display = "block";
   compute();
 }
 
+// download button handler
+function download() {
+  let buffer = doc.toByteArray()
+  saveByteArray('OSMcity.3dm', buffer)
+}
+
+function saveByteArray(fileName, byte) {
+  let blob = new Blob([byte], { type: 'application/octect-stream' })
+  let link = document.createElement('a')
+  link.href = window.URL.createObjectURL(blob)
+  link.download = fileName
+  link.click()
+}
 
 // THREE BOILERPLATE //
 let scene, camera, renderer, controls;

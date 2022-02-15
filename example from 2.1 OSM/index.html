@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>RhinoCompute: GH SubD Object</title>
+        <title>RhinoCompute: GH OSM Geometry</title>
         <style>
             body { margin: 0; font-family: Arial, Helvetica, sans-serif; }
             input {width: 90%;}
@@ -33,14 +33,14 @@
         <div id="container">
             <div id="overlay">
                 <div>
-                    <input type="range" id="count" name="count" min="1" max="50" value="10" step="1">
-                    <label for="count">Count</label>
+                    <input type="text" id="bbox" name="bbox" size="25" placeholder="-3.715795,40.406465,-3.680089,40.444623">
+                    <label for="height">Bounding Box</label>
                 </div>
                 <div>
-                    <input type="range" id="radius" name="radius" min="1" max="10" value="7" step="1">
-                    <label for="radius">Radius</label>
+                    <input type="text" id="osmkey" name="osmkey" size="25" placeholder="building, street, amenity...">
+                    <label for="height">OSM Feature Type</label>
                 </div>
-
+                <button id="downloadButton" disabled>Download</button>
             </div>
         </div>
         <script type="module" src="script.js"></script>
