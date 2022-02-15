@@ -5,17 +5,30 @@ import rhino3dm from "https://cdn.jsdelivr.net/npm/rhino3dm@7.11.1/rhino3dm.modu
 import { RhinoCompute } from "https://cdn.jsdelivr.net/npm/compute-rhino3d@0.13.0-beta/compute.rhino3d.module.js";
 import { Rhino3dmLoader } from "https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/loaders/3DMLoader.js";
 
-const definitionName = "OSM_node.gh";
+const definitionName = "terrain_node.gh";
 
 const downloadButton = document.getElementById("downloadButton")
 downloadButton.onclick = download
 
-// Set up texts
-const bbox_input = document.getElementById("bbox");
-bbox_input.addEventListener("input", onChange, false);
+//initialize fixity values
+var analyzeval = 0;
 
-const OSMkey_input = document.getElementById("osmkey");
-OSMkey_input.addEventListener("input", onChange, false);
+// Set up texts
+
+
+const terrain_input = document.getElementById("terrain");
+terrain_input.addEventListener("input", onChange, false);
+
+const res_slider = document.getElementById("resolution");
+res_slider.addEventListener("mouseup", onChange, false);
+res_slider.addEventListener("touchend", onChange, false);
+
+const concavity = document.getElementById('concavity');
+concavity.addEventListener('click', radioClick);
+const elevation = document.getElementById('elevation');
+elevation.addEventListener('click', radioClick);
+const roughness = document.getElementById('roughness');
+roughness.addEventListener('click', radioClick);
 
 const loader = new Rhino3dmLoader();
 loader.setLibraryPath("https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/");
@@ -40,34 +53,48 @@ rhino3dm().then(async (m) => {
 
   init();
   compute();
+
 });
 
-async function compute() 
+//function sets fixity values on click and recomputes
+function radioClick(){
 
- // console.log(text_input.value)
- if (bbox_input.value.length === 0) return
- // format data
- let param1 = new RhinoCompute.Grasshopper.DataTree('boundingBox')
- param1.append([0], [bbox_input.value])
- console.log(bbox_input.value)
+    const analyzeButtons = document.querySelectorAll('input[name="analyzeBottom"]');
+      for (const analyzeButton of analyzeButtons){
+          if (analyzeButton.checked){
+              analyzeval = analyzeButton.value;
+          }
+          return;
+        
+      }
+      
+    // show spinner
+    document.getElementById('loader').style.display = 'block'
+    compute()
+}
 
- let param2 = new RhinoCompute.Grasshopper.DataTree('OSMFeatureType')
- param1.append([0], [OSMkey_input.value])
- console.log(OSMkey_input.value)
 
- {
+async function compute() {
+
+ const param1 = new RhinoCompute.Grasshopper.DataTree("Terrain");
+ param1.append([0], [terrain_input.value]);
+
+ const param2 = new RhinoCompute.Grasshopper.DataTree("Resolution");
+  param2.append([0], [res_slider.valueAsNumber]);
+
+  const param3 = new RhinoCompute.Grasshopper.DataTree('Analyze')
+  param3.append([0], [analyzeval])
 
   // clear values
   const trees = [];
   trees.push(param1);
   trees.push(param2);
+  trees.push(param3);
 
   const res = await RhinoCompute.Grasshopper.evaluateDefinition(
     definition,
     trees
   );
-
-  collectResults(res)
 
   console.log(res);
 
@@ -148,12 +175,6 @@ function onChange() {
   compute();
 }
 
-// download button handler
-function download() {
-  let buffer = doc.toByteArray()
-  saveByteArray('OSMcity.3dm', buffer)
-}
-
 function saveByteArray(fileName, byte) {
   let blob = new Blob([byte], { type: 'application/octect-stream' })
   let link = document.createElement('a')
@@ -166,39 +187,45 @@ function saveByteArray(fileName, byte) {
 let scene, camera, renderer, controls;
 
 function init() {
-  // create a scene and a camera
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(1, 1, 1);
-  camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  );
-  camera.position.z = -30;
 
-  // create the renderer and add it to the html
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
+  THREE.Object3D.DefaultUp = new THREE.Vector3( 0, 0, 1 )
+  scene = new THREE.Scene()
+  //scene.background = new THREE.Color(15,15,15)
+  camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 5000 )
+  camera.position.set (1000,1000,1000);
 
-  // add some controls to orbit the camera
-  controls = new OrbitControls(camera, renderer.domElement);
+ // create the renderer and add it to the html
+ renderer = new THREE.WebGLRenderer({ antialias: true });
+ renderer.setSize(window.innerWidth, window.innerHeight);
+ document.body.appendChild(renderer.domElement);
 
-  // add a directional light
-  const directionalLight = new THREE.DirectionalLight(0xffffff);
-  directionalLight.intensity = 2;
-  scene.add(directionalLight);
+ // add some controls to orbit the camera
+ controls = new OrbitControls(camera, renderer.domElement);
 
-  const ambientLight = new THREE.AmbientLight();
-  scene.add(ambientLight);
+ // add a directional light
+ const directionalLight = new THREE.DirectionalLight(0xffffff);
+ directionalLight.intensity = 2;
+ scene.add(directionalLight);
 
-  animate();
+ const ambientLight = new THREE.AmbientLight();
+ scene.add(ambientLight);
+
+ animate();
 }
 
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
+}
+
+// download button handler
+function download () {
+  let buffer = doc.toByteArray()
+  let blob = new Blob([ buffer ], { type: "application/octect-stream" })
+  let link = document.createElement('a')
+  link.href = window.URL.createObjectURL(blob)
+  link.download = 'Analyzed Terrain.3dm'
+  link.click()
 }
 
 function onWindowResize() {

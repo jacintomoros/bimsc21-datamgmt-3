@@ -5,16 +5,15 @@ import rhino3dm from "https://cdn.jsdelivr.net/npm/rhino3dm@7.11.1/rhino3dm.modu
 import { RhinoCompute } from "https://cdn.jsdelivr.net/npm/compute-rhino3d@0.13.0-beta/compute.rhino3d.module.js";
 import { Rhino3dmLoader } from "https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/loaders/3DMLoader.js";
 
-const definitionName = "rnd_node.gh";
+const definitionName = "terrain_node.gh";
 
 // Set up sliders
-const radius_slider = document.getElementById("radius");
-radius_slider.addEventListener("mouseup", onSliderChange, false);
-radius_slider.addEventListener("touchend", onSliderChange, false);
+const text_input = document.getElementById('text')
+text_input.addEventListener('input', onChange, false)
 
 const count_slider = document.getElementById("count");
-count_slider.addEventListener("mouseup", onSliderChange, false);
-count_slider.addEventListener("touchend", onSliderChange, false);
+count_slider.addEventListener("mouseup", onChange, false);
+count_slider.addEventListener("touchend", onChange, false);
 
 const loader = new Rhino3dmLoader();
 loader.setLibraryPath("https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/");
@@ -143,16 +142,13 @@ function onSliderChange() {
 let scene, camera, renderer, controls;
 
 function init() {
-  // create a scene and a camera
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(1, 1, 1);
-  camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  );
-  camera.position.z = -30;
+    THREE.Object3D.DefaultUp = new THREE.Vector3( 0, 0, 1 )
+
+    // create a scene and a camera
+    scene = new THREE.Scene()
+    scene.background = new THREE.Color(1,1,1)
+    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 5000 )
+    camera.position.set (10,10,10);
 
   // create the renderer and add it to the html
   renderer = new THREE.WebGLRenderer({ antialias: true });
