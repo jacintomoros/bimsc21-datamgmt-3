@@ -10,7 +10,7 @@ const definitionName = "OSM_node.gh";
 const downloadButton = document.getElementById("downloadButton")
 downloadButton.onclick = download
 
-// Set up sliders
+// Set up texts
 const bbox_input = document.getElementById("bbox");
 bbox_input.addEventListener("input", onChange, false);
 
@@ -45,7 +45,7 @@ rhino3dm().then(async (m) => {
 async function compute() 
 
  // console.log(text_input.value)
- if (text_input.value.length === 0) return
+ if (bbox_input.value.length === 0) return
  // format data
  let param1 = new RhinoCompute.Grasshopper.DataTree('boundingBox')
  param1.append([0], [bbox_input.value])
