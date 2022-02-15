@@ -5,8 +5,10 @@ import rhino3dm from "https://cdn.jsdelivr.net/npm/rhino3dm@7.11.1/rhino3dm.modu
 import { RhinoCompute } from "https://cdn.jsdelivr.net/npm/compute-rhino3d@0.13.0-beta/compute.rhino3d.module.js";
 import { Rhino3dmLoader } from "https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/loaders/3DMLoader.js";
 
+//Define grasshopper script
 const definitionName = "terrain_node.gh";
 
+// Set up button click handlers
 const downloadButton = document.getElementById("downloadButton")
 downloadButton.onclick = download
 
@@ -15,13 +17,9 @@ var analyzeval = 0;
 
 // Set up texts
 
-
-const terrain_input = document.getElementById("terrain");
-terrain_input.addEventListener("input", onChange, false);
-
-const res_slider = document.getElementById("resolution");
-res_slider.addEventListener("mouseup", onChange, false);
-res_slider.addEventListener("touchend", onChange, false);
+const growth = document.getElementById("growth");
+growth.addEventListener("mouseup", onChange, false);
+growth.addEventListener("touchend", onChange, false);
 
 const concavity = document.getElementById('concavity');
 concavity.addEventListener('click', radioClick);
@@ -29,6 +27,10 @@ const elevation = document.getElementById('elevation');
 elevation.addEventListener('click', radioClick);
 const roughness = document.getElementById('roughness');
 roughness.addEventListener('click', radioClick);
+const viewshed = document.getElementById('viewshed');
+viewshed.addEventListener('click', radioClick);
+const watershed = document.getElementById('watershed');
+watershed.addEventListener('click', radioClick);
 
 const loader = new Rhino3dmLoader();
 loader.setLibraryPath("https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/");
@@ -54,7 +56,7 @@ rhino3dm().then(async (m) => {
   init();
   compute();
 
-});
+})
 
 //function sets fixity values on click and recomputes
 function radioClick(){
@@ -63,10 +65,9 @@ function radioClick(){
       for (const analyzeButton of analyzeButtons){
           if (analyzeButton.checked){
               analyzeval = analyzeButton.value;
-          }
           return;
         
-      }
+      }}
       
     // show spinner
     document.getElementById('loader').style.display = 'block'
@@ -76,20 +77,17 @@ function radioClick(){
 
 async function compute() {
 
- const param1 = new RhinoCompute.Grasshopper.DataTree("Terrain");
- param1.append([0], [terrain_input.value]);
+ const param1 = new RhinoCompute.Grasshopper.DataTree("Growth");
+  param1.append([0], [growth.valueAsNumber]);
 
- const param2 = new RhinoCompute.Grasshopper.DataTree("Resolution");
-  param2.append([0], [res_slider.valueAsNumber]);
-
-  const param3 = new RhinoCompute.Grasshopper.DataTree('Analyze')
-  param3.append([0], [analyzeval])
+  const param2 = new RhinoCompute.Grasshopper.DataTree('Analyze')
+  param2.append([0], [analyzeval])
 
   // clear values
   const trees = [];
   trees.push(param1);
   trees.push(param2);
-  trees.push(param3);
+
 
   const res = await RhinoCompute.Grasshopper.evaluateDefinition(
     definition,
@@ -192,7 +190,7 @@ function init() {
   scene = new THREE.Scene()
   //scene.background = new THREE.Color(15,15,15)
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 5000 )
-  camera.position.set (1000,1000,1000);
+  camera.position.set (10,10,10);
 
  // create the renderer and add it to the html
  renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -224,7 +222,7 @@ function download () {
   let blob = new Blob([ buffer ], { type: "application/octect-stream" })
   let link = document.createElement('a')
   link.href = window.URL.createObjectURL(blob)
-  link.download = 'Analyzed Terrain.3dm'
+  link.download = 'AnalyzedTerrain.3dm'
   link.click()
 }
 
