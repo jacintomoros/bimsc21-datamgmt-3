@@ -69,7 +69,7 @@ async function compute()
 
   collectResults(res)
 
-  //console.log(res);
+  console.log(res);
 
   doc = new rhino.File3dm();
 
